@@ -9,6 +9,11 @@
     <body>
         <main>
             <h1>Beacon Patrol Board Scorer</h1>
+            {% if error %}
+                <div style="color: red; margin: 1em 0;">
+                    <strong>Error:</strong> {{ error }}
+                </div>
+            {% endif %}
             <p>Upload a photo of your game board to get your score!</p>
 
             <form action="/upload" method="post" enctype="multipart/form-data">

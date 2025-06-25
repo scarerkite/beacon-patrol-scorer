@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Beacon Patrol Scorer - Results</title>
+    </head>
+
+    <body>
+        <main>
+            <h1>Beacon Patrol Board Scorer</h1>
+
+            <div class="results">
+                <h2>Your Results</h2>
+                <p><strong>Score:</strong> {{ score }} points</p>
+                <p><strong>Rank:</strong> {{ rank }}</p>
+
+                <h3>Your Board</h3>
+                <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Uploaded Beacon Patrol board"
+                    style="max-width: 100%; height: auto;">
+
+                <a href="{{ url_for('index') }}">Score Another Board</a>
+            </div>
+        </main>
+    </body>
+</html>
