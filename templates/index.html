@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Beacon Patrol Scorer</title>
+    </head>
+
+    <body>
+        <main>
+            <h1>Beacon Patrol Board Scorer</h1>
+            <p>Upload a photo of your game board to get your score!</p>
+
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <label for="board-image">Choose board image:</label>
+                <input type="file" id="board-image" name="file" accept="image/*" required aria-describedby="file-help">
+                <div id="file-help">Accepted formats: JPG, PNG, GIF</div>
+                <button type="submit">Upload & Score Board</button>
+            </form>
+        </main>
+    </body>
+</html>
