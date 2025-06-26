@@ -3,7 +3,7 @@ import tempfile
 import io
 from PIL import Image
 from app import app
-from board_analyzer import analyze_board_colors, identify_blue_tiles
+from board_analyzer import analyze_board_colors
 import cv2
 import numpy as np
 import os
@@ -27,8 +27,13 @@ def red_dominant_image():
     return img_bytes
 
 @pytest.fixture
-def simple_game_image():
-    image_path = "test_images/valid_boards/simple_game1.png"
+def simple_game_image_path():
+    image_path = "test_images/valid_boards/7_tiles_blue.jpg"
+    return image_path
+
+@pytest.fixture
+def game_image_path():
+    image_path = "test_images/valid_boards/14_tiles.jpg"
     return image_path
 
 def test_predominantly_blue_image_is_valid_board(blue_dominant_image):
@@ -66,27 +71,3 @@ def test_analyze_board_colors_accepts_pil_image():
     
     assert result == True
 
-def test_identify_blue_tiles_finds_correct_number(simple_game_image):
-    contours = identify_blue_tiles(simple_game_image)
-    assert len(contours) == 7, f"Expected 7 tiles, found {len(contours)}"
-
-# def test_identify_blue_tiles_with_different_image(different_game_image):
-#     """Test with a different board layout - adjust expected count as needed"""
-#     if os.path.exists(different_game_image):
-#         contours = identify_blue_tiles(different_game_image)
-#         # You'll need to count the tiles in your second test image
-#         assert len(contours) > 0, "Should find at least some tiles"
-#         assert len(contours) < 20, "Shouldn't find an unrealistic number of tiles"
-#     else:
-#         pytest.skip("Second test image not available")
-
-def test_identify_blue_tiles_handles_missing_file():
-    """Test that function handles non-existent files gracefully"""
-    with pytest.raises(FileNotFoundError):
-        identify_blue_tiles("non_existent_file.jpg")
-
-def test_identify_blue_tiles_returns_list():
-    """Test that function returns a list of contours"""
-    contours = identify_blue_tiles("test_images/valid_boards/simple_game1.png")
-    assert isinstance(contours, list), "Should return a list of contours"
-    assert all(hasattr(contour, 'shape') for contour in contours), "Each item should be a contour array"

@@ -1,6 +1,7 @@
 from PIL import Image
 import cv2
 import numpy as np
+from arrow_detection import validate_board_arrows 
 
 def is_blue(pixel):
     r, g, b = pixel
@@ -29,36 +30,18 @@ def analyze_board_colors(image_data):
     blue_percentage = blue_count / len(sampled_pixels)
     print(f"Blue percentage: {blue_percentage:.2f}")
 
-    return blue_percentage > 0.5  # 50% threshold
+    return blue_percentage > 0.5  # 50% threshold   
 
-def identify_blue_tiles(image_path):
-    image = cv2.imread(image_path)
-    if image is None:
-        raise FileNotFoundError(f"Could not load image: {image_path}")
+def analyze_full_board(image_path):
+    return validate_board_arrows(image_path)
 
-    lower_blue = np.array([95, 100, 150])
-    upper_blue = np.array([115, 255, 255])
-
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, lower_blue, upper_blue)
-
-    # Morphological opening to separate touching blue regions
-    # Temporarily takes away pixels to remove noise and find edges
-    # Grows them again so the final result is roughly the right size
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    for contour in contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 8)
-
-    return list(contours)
-
-    # cv2.imshow("Blue Tiles", image)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-    
 # if __name__ == "__main__":
-#     identify_blue_tiles()
+#     is_valid, message, correct_count, incorrect_count, annotated_image = analyze_full_board("test_images/invalid_boards/5_tiles_3_arrows_wrong.jpg")
+#     print(f"Result: {is_valid}")
+#     print(f"Message: {message}")
+#     print(f"Correct count: {correct_count}")
+#     print(f"Incorrect count: {incorrect_count}")
+
+#     cv2.imshow("Debug Arrow Detection", annotated_image)
+#     cv2.waitKey(0)
+#     cv2.destroyAllWindows()
