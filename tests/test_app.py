@@ -100,3 +100,20 @@ def test_upload_integration_happy_path(client, sample_image):
     assert response.status_code == 200
     assert b"Your Results" in response.data
     assert b"42" in response.data  # placeholder score
+
+def test_upload_non_beacon_patrol_image_shows_error(client, mixed_grayscale_image):
+    """Test that uploading a non-game image shows appropriate error"""
+    response = client.post("/upload", data={
+        "file": (mixed_grayscale_image, "not_a_game.jpg")
+    })
+
+    assert response.status_code == 400
+    assert b"does not look like a Beacon Patrol game" in response.data
+
+def test_upload_valid_beacon_patrol_image_succeeds(client, beacon_patrol_style_image):
+    """Test that a blue/white image is accepted and shows results"""
+    response = client.post("/upload", data={
+        "file": (beacon_patrol_style_image, "valid_game.jpg")
+    })
+    assert response.status_code == 200
+    assert b"Your Results" in response.data

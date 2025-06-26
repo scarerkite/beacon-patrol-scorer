@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 import os
 from werkzeug.utils import secure_filename
 from PIL import Image
-from flask import send_from_directory
+from board_analyzer import analyze_board_colors
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "uploads"
@@ -37,6 +37,9 @@ def upload_file():
                     return render_template("index.html", error="Image too small"), 400
                 if width > 4000 or height > 4000:
                     return render_template("index.html", error="Image too large"), 400
+                if not analyze_board_colors(img):
+                    return render_template("index.html", 
+                        error="This does not look like a Beacon Patrol game. Please upload a different photo."), 400
                 
                 # Placeholder score and rank calculation
                 score = 42
