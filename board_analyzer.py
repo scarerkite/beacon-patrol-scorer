@@ -39,7 +39,7 @@ def _check_board_colors(image_input):
             blue_count += 1
 
     blue_percentage = blue_count / len(sampled_pixels)
-    return blue_percentage > 0.5  # 50% threshold
+    return blue_percentage > 0.15  # 15% threshold
 
 def _calculate_score(image_path):
     """Calculate the actual game score (placeholder for now)"""

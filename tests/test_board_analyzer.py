@@ -40,6 +40,28 @@ def valid_blue_image():
     img = Image.new("RGB", (800, 600), color=(135, 206, 235))
     return img
 
+@pytest.fixture
+def beacon_patrol_image():
+    """Use actual beacon patrol board photo"""
+    with open("test_images/valid_boards/7_tiles_blue.jpg", "rb") as f:
+        img_bytes = io.BytesIO(f.read())
+        img_bytes.seek(0)
+        return img_bytes
+    
+@pytest.fixture
+def mixed_grayscale_image():
+    """Create an image that's half gray, half black (should fail)"""
+    img = Image.new("RGB", (800, 600), color=(128, 128, 128))
+    pixels = img.load()
+    for x in range(400, 800):
+        for y in range(600):
+            pixels[x, y] = (0, 0, 0)
+    
+    img_bytes = io.BytesIO()
+    img.save(img_bytes, format="JPEG")
+    img_bytes.seek(0)
+    return img_bytes
+
 # Test the complete analysis function
 def test_analyze_complete_board_fails_on_small_image(small_image):
     """Test that small images fail at size check"""
@@ -83,9 +105,9 @@ def test_analyze_complete_board_succeeds_with_valid_image(valid_blue_image):
     assert result['errors'] == []
     assert result['details']['passed_all_checks'] == True
 
-def test_analyze_complete_board_succeeds_with_beacon_patrol_style_image(beacon_patrol_style_image):
+def test_analyze_complete_board_succeeds_with_beacon_patrol_image(beacon_patrol_image):
     """Test that blue/white mixed images pass validation"""
-    result = analyze_complete_board(beacon_patrol_style_image)
+    result = analyze_complete_board(beacon_patrol_image)
     
     assert result['is_valid'] == True
     assert result['score'] == 42
