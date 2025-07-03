@@ -113,7 +113,8 @@ def analyze_complete_board(image_input, save_path=None):
                     'details': {
                         'correct_arrows': correct_count,
                         'incorrect_arrows': incorrect_count
-                    }
+                    },
+                    'annotated_image': annotated_image
                 }
             
             arrow_details = {
@@ -142,7 +143,8 @@ def analyze_complete_board(image_input, save_path=None):
             'details': {
                 'passed_all_checks': True,
                 **arrow_details
-            }
+            },
+            'annotated_image': annotated_image if save_path else None
         }
         
     except Exception as e:

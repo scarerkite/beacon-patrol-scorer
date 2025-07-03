@@ -16,7 +16,8 @@
                 <p><strong>Rank:</strong> {{ rank }}</p>
 
                 <h3>Your Board</h3>
-                <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Uploaded Beacon Patrol board"
+                <img src="{{ url_for('uploaded_file', filename=filename) }}"
+                    alt="Analyzed Beacon Patrol board with annotations"
                     style="max-width: 100%; height: auto;">
 
                 <a href="{{ url_for('index') }}">Score Another Board</a>

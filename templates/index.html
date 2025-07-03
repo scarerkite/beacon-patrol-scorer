@@ -13,6 +13,13 @@
                 <div style="color: red; margin: 1em 0;">
                     <strong>Error:</strong> {{ error }}
                 </div>
+                {% if annotated_filename %}
+                    <div style="margin: 1em 0;">
+                        <h3>Your Board (showing issues):</h3>
+                        <img src="{{ url_for('uploaded_file', filename=annotated_filename) }}"
+                            alt="Board image showing arrow orientation errors" style="max-width: 100%; height: auto;">
+                    </div>
+                {% endif %}
             {% endif %}
             <p>Upload a photo of your game board to get your score!</p>
 
