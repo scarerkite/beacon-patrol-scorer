@@ -1,5 +1,4 @@
 import pytest
-import os
 import tempfile
 from PIL import Image
 import io
@@ -18,24 +17,6 @@ def client():
 def sample_image():
     """Create a sample image for testing"""
     img = Image.new("RGB", (800, 600), color="blue")
-    img_bytes = io.BytesIO()
-    img.save(img_bytes, format="JPEG")
-    img_bytes.seek(0)
-    return img_bytes
-
-@pytest.fixture
-def sample_small_image():
-    """Create a sample small image for testing"""
-    img = Image.new("RGB", (100, 300), color="blue")
-    img_bytes = io.BytesIO()
-    img.save(img_bytes, format="JPEG")
-    img_bytes.seek(0)
-    return img_bytes
-
-@pytest.fixture
-def sample_large_image():
-    """Create a sample large image for testing"""
-    img = Image.new("RGB", (500, 4001), color="blue")
     img_bytes = io.BytesIO()
     img.save(img_bytes, format="JPEG")
     img_bytes.seek(0)
@@ -68,22 +49,6 @@ def test_upload_no_file(client):
     assert response.status_code == 400
     assert b"Upload a photo of your game board" in response.data
 
-def test_upload_small_image(client, sample_small_image):
-    """Test uploading a small image returns error"""
-    response = client.post("/upload", data={
-        "file": (sample_small_image, "test.jpg")
-    })
-    assert response.status_code == 400
-    assert b"Upload a photo of your game board" in response.data
-
-def test_upload_large_image(client, sample_large_image):
-    """Test uploading a large image returns error"""
-    response = client.post("/upload", data={
-        "file": (sample_large_image, "test.jpg")
-    })
-    assert response.status_code == 400
-    assert b"Upload a photo of your game board" in response.data
-
 def test_upload_non_image(client, text_file):
     """Test uploading a text file returns error"""
     response = client.post("/upload", data={
@@ -100,20 +65,3 @@ def test_upload_integration_happy_path(client, sample_image):
     assert response.status_code == 200
     assert b"Your Results" in response.data
     assert b"42" in response.data  # placeholder score
-
-def test_upload_non_beacon_patrol_image_shows_error(client, mixed_grayscale_image):
-    """Test that uploading a non-game image shows appropriate error"""
-    response = client.post("/upload", data={
-        "file": (mixed_grayscale_image, "not_a_game.jpg")
-    })
-
-    assert response.status_code == 400
-    assert b"does not look like a Beacon Patrol game" in response.data
-
-def test_upload_valid_beacon_patrol_image_succeeds(client, beacon_patrol_style_image):
-    """Test that a blue/white image is accepted and shows results"""
-    response = client.post("/upload", data={
-        "file": (beacon_patrol_style_image, "valid_game.jpg")
-    })
-    assert response.status_code == 200
-    assert b"Your Results" in response.data

@@ -2,11 +2,7 @@ import pytest
 import tempfile
 import io
 from PIL import Image
-from app import app
-from board_analyzer import analyze_board_colors
-import cv2
-import numpy as np
-import os
+from board_analyzer import analyze_complete_board, _is_valid_image_size
 
 @pytest.fixture
 def green_dominant_image():
@@ -27,47 +23,99 @@ def red_dominant_image():
     return img_bytes
 
 @pytest.fixture
-def simple_game_image_path():
-    image_path = "test_images/valid_boards/7_tiles_blue.jpg"
-    return image_path
+def small_image():
+    """Create a small image (should fail size check)"""
+    img = Image.new("RGB", (100, 100), color=(135, 206, 235))
+    return img
 
 @pytest.fixture
-def game_image_path():
-    image_path = "test_images/valid_boards/14_tiles.jpg"
-    return image_path
+def large_image():
+    """Create a large image (should fail size check)"""
+    img = Image.new("RGB", (5000, 5000), color=(135, 206, 235))
+    return img
 
-def test_predominantly_blue_image_is_valid_board(blue_dominant_image):
-    """Test result from a predominantly blue image"""
-    response = analyze_board_colors(blue_dominant_image)
-    assert response == True
+@pytest.fixture
+def valid_blue_image():
+    """Create a valid blue image"""
+    img = Image.new("RGB", (800, 600), color=(135, 206, 235))
+    return img
 
-def test_beacon_patrol_style_image_is_valid_board(beacon_patrol_style_image):
-    """Test that a blue/white mixed image is recognized as valid"""
-    response = analyze_board_colors(beacon_patrol_style_image)
-    assert response == True
-
-def test_invalid_colors_mostly_green(green_dominant_image):
-    """Test result from a predominantly green image"""
-    response = analyze_board_colors(green_dominant_image)
-    assert response == False
-
-def test_invalid_colors_mostly_red(red_dominant_image):
-    """Test result from a predominantly red image"""
-    response = analyze_board_colors(red_dominant_image)
-    assert response == False
-
-def test_mixed_grayscale_image_is_not_valid_board(mixed_grayscale_image):
-    """Test that a mixed gray/black image is not recognized as a valid board"""
-    response = analyze_board_colors(mixed_grayscale_image)
-    assert response == False
-
-def test_analyze_board_colors_accepts_pil_image():
-    """Test that analyze_board_colors can handle PIL Image objects directly"""
-    # Create a PIL Image (not BytesIO)
-    img = Image.new("RGB", (800, 600), color=(135, 206, 235))  # Blue
+# Test the complete analysis function
+def test_analyze_complete_board_fails_on_small_image(small_image):
+    """Test that small images fail at size check"""
+    result = analyze_complete_board(small_image)
     
-    # Pass PIL Image directly
-    result = analyze_board_colors(img)
-    
-    assert result == True
+    assert result['is_valid'] == False
+    assert result['failed_at'] == 'size_check'
+    assert 'too small' in result['errors'][0].lower()
 
+def test_analyze_complete_board_fails_on_large_image(large_image):
+    """Test that large images fail at size check"""
+    result = analyze_complete_board(large_image)
+    
+    assert result['is_valid'] == False
+    assert result['failed_at'] == 'size_check'
+    assert 'too large' in result['errors'][0].lower()
+
+def test_analyze_complete_board_fails_on_wrong_colors(red_dominant_image):
+    """Test that non-blue images fail at color check"""
+    result = analyze_complete_board(red_dominant_image)
+    
+    assert result['is_valid'] == False
+    assert result['failed_at'] == 'color_check'
+    assert 'does not look like a Beacon Patrol game' in result['errors'][0]
+
+def test_analyze_complete_board_fails_on_grayscale_image(mixed_grayscale_image):
+    """Test that grayscale images fail at color check"""
+    result = analyze_complete_board(mixed_grayscale_image)
+    
+    assert result['is_valid'] == False
+    assert result['failed_at'] == 'color_check'
+    assert 'does not look like a Beacon Patrol game' in result['errors'][0]
+
+def test_analyze_complete_board_succeeds_with_valid_image(valid_blue_image):
+    """Test that valid blue images pass all basic checks"""
+    result = analyze_complete_board(valid_blue_image)
+    
+    assert result['is_valid'] == True
+    assert result['score'] == 42  # Placeholder score
+    assert result['rank'] == 'Sailors'  # Placeholder rank
+    assert result['errors'] == []
+    assert result['details']['passed_all_checks'] == True
+
+def test_analyze_complete_board_succeeds_with_beacon_patrol_style_image(beacon_patrol_style_image):
+    """Test that blue/white mixed images pass validation"""
+    result = analyze_complete_board(beacon_patrol_style_image)
+    
+    assert result['is_valid'] == True
+    assert result['score'] == 42
+    assert result['rank'] == 'Sailors'
+
+def test_analyze_complete_board_returns_consistent_structure():
+    """Test that function always returns expected structure"""
+    # Test with invalid input
+    result = analyze_complete_board("nonexistent_file.jpg")
+    
+    required_keys = ['is_valid', 'errors']
+    for key in required_keys:
+        assert key in result
+    
+    # Valid result should have additional keys
+    valid_image = Image.new("RGB", (800, 600), color=(135, 206, 235))
+    result = analyze_complete_board(valid_image)
+    
+    if result['is_valid']:
+        assert 'score' in result
+        assert 'rank' in result
+        assert 'details' in result
+
+# Test individual helper functions
+def test_is_valid_image_size():
+    """Test size validation function"""
+    small_img = Image.new("RGB", (100, 100), color="blue")
+    large_img = Image.new("RGB", (5000, 5000), color="blue")
+    valid_img = Image.new("RGB", (800, 600), color="blue")
+    
+    assert _is_valid_image_size(small_img) == False
+    assert _is_valid_image_size(large_img) == False
+    assert _is_valid_image_size(valid_img) == True
