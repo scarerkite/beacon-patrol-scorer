@@ -9,6 +9,20 @@ def detect_scorable_tiles(image_path):
     Returns:
         tuple: (total_tiles, scorable_tiles, annotated_image)
     """
+
+    print(f"detect_scorable_tiles: Loading {image_path}")
+    
+    correct_positions, incorrect_positions, image = get_arrow_positions(image_path)
+    print(f"Arrow detection: {len(correct_positions)} correct, {len(incorrect_positions)} incorrect")
+    
+    if image is None:
+        print("get_arrow_positions returned None image")
+        return 0, 0, None, []
+    
+    if len(correct_positions) == 0:
+        print("No correct arrows found - cannot estimate tile positions")
+        return 0, 0, image, []
+    
     correct_positions, _, image = get_arrow_positions(image_path)
     
     if image is None:
@@ -171,7 +185,7 @@ def _annotate_scorable_tiles(image, scorable_boundaries):
     # TODO: Add visual annotations later
     return image
 
-def visualize_tile_boundaries(image_path, save_path=None):
+def visualise_tile_boundaries(image_path, save_path=None):
     """Draw tile boundaries on image for visual verification"""
     correct_positions, _, image = get_arrow_positions(image_path)
     
@@ -238,4 +252,4 @@ if __name__ == "__main__":
     print("\n=== VISUALIZING TILE BOUNDARIES ===")
     
     # Show the visual representation
-    visualize_tile_boundaries(image_path)
+    visualise_tile_boundaries(image_path)

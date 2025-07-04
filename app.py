@@ -32,10 +32,11 @@ def upload_file():
 
         try:
             with Image.open(filepath) as img:
-                # Run complete board analysis with fail-fast validation
+                # Run complete board analysis
                 result = analyze_complete_board(img, filepath)
 
                 if not result['is_valid']:
+                    # Handle arrow validation errors (still has annotated_image)
                     if result.get('annotated_image') is not None:
                         annotated_filename = f"annotated_{filename}"
                         annotated_path = os.path.join(app.config["UPLOAD_FOLDER"], annotated_filename)
@@ -46,23 +47,32 @@ def upload_file():
                     
                     return render_template("index.html", error=result['errors'][0]), 400
                 
-                display_filename = filename
+                # Success! Use the annotated filename that was already saved
+                annotated_filename = result.get('annotated_filename')
 
-                if result.get('annotated_image') is not None:
-                    annotated_filename = f"annotated_{filename}"
-                    annotated_path = os.path.join(app.config["UPLOAD_FOLDER"], annotated_filename)
-                    cv2.imwrite(annotated_path, result['annotated_image'])
-                    display_filename = annotated_filename
-
-                return render_template("results.html", 
-                                 filename=display_filename,  # Show annotated version
-                                 original_filename=filename,  # Keep original available
-                                 score=result['score'], 
-                                 rank=result['rank'],
-                                 details=result.get('details', {}))
+                if annotated_filename is None:
+                    # Image generation failed, but scoring worked
+                    return render_template("results.html", 
+                                        filename=filename,  # Show original image
+                                        score=result['score'], 
+                                        rank=result['rank'],
+                                        breakdown=result['breakdown'],
+                                        details=result.get('details', {}))
+                else:
+                    # Show annotated image
+                    annotated_filename = os.path.basename(annotated_filename)
+                    return render_template("results.html", 
+                                        filename=annotated_filename,
+                                        score=result['score'], 
+                                        rank=result['rank'],
+                                        breakdown=result['breakdown'],
+                                        details=result.get('details', {}))
                     
         except Exception as e:
             return render_template("index.html", error="Error: Not a valid image file"), 400
+
+
+    
         
 @app.route("/uploads/<filename>")
 def uploaded_file(filename):

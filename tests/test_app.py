@@ -59,9 +59,11 @@ def test_upload_non_image(client, text_file):
 
 def test_upload_integration_happy_path(client, sample_image):
     """Test complete upload workflow returns expected elements"""
-    response = client.post("/upload", data={
-        "file": (sample_image, "test_board.jpg")
-    })
+    with open("test_images/valid_boards/board_7.jpg", "rb") as f:
+        response = client.post("/upload", data={
+            "file": (f, "board_7.jpg")
+        })
     assert response.status_code == 200
     assert b"Your Results" in response.data
-    assert b"42" in response.data  # placeholder score
+    assert b"7 points" in response.data  # Known score for this board
+    assert b"Novices" in response.data   # Known rank

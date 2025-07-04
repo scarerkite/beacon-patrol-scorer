@@ -13,7 +13,7 @@
             <div class="results">
                 <h2>Your Results</h2>
                 <p><strong>Score:</strong> {{ score }} points</p>
-                <p><strong>Rank:</strong> {{ rank }}</p>
+                <p><strong>Rank:</strong> {{ rank[0] }}: {{ rank[1] }}</p>
 
                 <h3>Your Board</h3>
                 <img src="{{ url_for('uploaded_file', filename=filename) }}"

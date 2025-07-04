@@ -91,6 +91,14 @@ def test_7_tile_board_has_7_correct_arrows():
     assert incorrect_count == 0
     assert annotated_image is not None
 
+def test_12_tile_board_has_12_correct_arrows():
+    """Test that the 12-tile board image detects exactly 12 correct arrows"""
+    correct_count, incorrect_count, annotated_image = detect_arrow_orientations("test_images/valid_boards/12_tiles.jpg")
+    
+    assert correct_count == 12
+    assert incorrect_count == 0
+    assert annotated_image is not None
+
 def test_14_tile_board_has_14_correct_arrows():
     """Test that the 14-tile board image detects exactly 14 correct arrows"""
     correct_count, incorrect_count, annotated_image = detect_arrow_orientations("test_images/valid_boards/14_tiles.jpg")

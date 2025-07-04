@@ -1,7 +1,9 @@
 from PIL import Image
 import cv2
+import os
 import numpy as np
-from arrow_detection import validate_board_arrows 
+from arrow_detection import validate_board_arrows
+from scored_objects_detector import calculate_board_score, generate_annotated_image
 
 def _is_blue(pixel):
     r, g, b = pixel
@@ -40,15 +42,6 @@ def _check_board_colors(image_input):
 
     blue_percentage = blue_count / len(sampled_pixels)
     return blue_percentage > 0.15  # 15% threshold
-
-def _calculate_score(image_path):
-    """Calculate the actual game score (placeholder for now)"""
-    # TODO: Implement actual tile detection and scoring
-    return 42
-
-def _get_rank_for_score(score):
-    # TODO: Implement comparison of score to rules
-    return "Sailors"
 
 def analyze_complete_board(image_input, save_path=None):
     """
@@ -132,20 +125,27 @@ def analyze_complete_board(image_input, save_path=None):
     
     # All hoops passed - calculate score
     try:
-        score = _calculate_score(save_path)
-        rank = _get_rank_for_score(score)
+        score_data = calculate_board_score(save_path)
+
+        base_name, ext = os.path.splitext(save_path)
+        if not ext:  # No extension detected
+            ext = '.jpg'  # Default to jpg
+        annotated_filename = f"{base_name}_scored{ext}"
+        annotation_success = generate_annotated_image(save_path, annotated_filename)
         
         return {
             'is_valid': True,
-            'score': score,
-            'rank': rank,
+            'score': score_data['score'],
+            'rank': score_data['rank'],
+            'breakdown': score_data['breakdown'],
             'errors': [],
             'details': {
                 'passed_all_checks': True,
                 **arrow_details
             },
-            'annotated_image': annotated_image if save_path else None
+            'annotated_filename': annotated_filename if annotation_success else None
         }
+
         
     except Exception as e:
         return {

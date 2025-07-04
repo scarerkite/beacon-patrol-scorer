@@ -95,23 +95,14 @@ def test_analyze_complete_board_fails_on_grayscale_image(mixed_grayscale_image):
     assert result['failed_at'] == 'color_check'
     assert 'does not look like a Beacon Patrol game' in result['errors'][0]
 
-def test_analyze_complete_board_succeeds_with_valid_image(valid_blue_image):
-    """Test that valid blue images pass all basic checks"""
-    result = analyze_complete_board(valid_blue_image)
+def test_analyze_complete_board_succeeds_with_valid_image():
+    """Test that analyze_complete_board works with a file path"""
+    image_path = "test_images/valid_boards/board_7.jpg"
+    result = analyze_complete_board(image_path, image_path)
     
     assert result['is_valid'] == True
-    assert result['score'] == 42  # Placeholder score
-    assert result['rank'] == 'Sailors'  # Placeholder rank
-    assert result['errors'] == []
-    assert result['details']['passed_all_checks'] == True
-
-def test_analyze_complete_board_succeeds_with_beacon_patrol_image(beacon_patrol_image):
-    """Test that blue/white mixed images pass validation"""
-    result = analyze_complete_board(beacon_patrol_image)
-    
-    assert result['is_valid'] == True
-    assert result['score'] == 42
-    assert result['rank'] == 'Sailors'
+    assert result['score'] == 7
+    assert 'Novices' in result['rank'][0]
 
 def test_analyze_complete_board_returns_consistent_structure():
     """Test that function always returns expected structure"""

@@ -5,7 +5,7 @@ import os
 import cv2
 import numpy as np
 from PIL import Image
-from tile_analyzer import detect_scorable_tiles, _estimate_tile_size, _estimate_tile_grid, _check_tile_surrounded, _rectangles_overlap, _annotate_scorable_tiles, visualize_scorable_boundaries
+from tile_analyzer import detect_scorable_tiles, _estimate_tile_size, _estimate_tile_grid, _check_tile_surrounded, _rectangles_overlap, _annotate_scorable_tiles, visualise_tile_boundaries
 from arrow_detection import get_arrow_positions
 
 @pytest.fixture 

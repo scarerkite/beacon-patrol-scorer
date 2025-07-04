@@ -119,10 +119,12 @@ def has_red_color(image_roi):
     return red_percentage > 0.02  # Lower threshold - 2% instead of 5%
 
 def generate_annotated_image(image_path, save_path):
+    print(f"generate_annotated_image called with: {image_path} -> {save_path}")
     analysis = _analyze_tiles(image_path)
-    
+    print(f"Analysis result: {analysis}")
     # Handle error cases
     if analysis['total_tiles'] == 0 or analysis['image'] is None:
+        print("Returning False - no tiles or no image")
         return False
     
     image = analysis['image'].copy()  # Work on a copy
@@ -219,6 +221,19 @@ def get_rank_for_score(score):
         return "Cartographers", "Incredible work! The good folks of the North Sea Coast will tell stories of your prowess for years to come."
     
 def _analyze_tiles(image_path):
+    print(f"Analyzing tiles for: {image_path}")
+    
+    # Check if image loads
+    image = cv2.imread(image_path)
+    if image is None:
+        print("Could not load image with cv2.imread")
+        return {'tiles': [], 'total_tiles': 0, 'scorable_count': 0, 'image': None}
+    
+    print(f"Image loaded successfully: {image.shape}")
+    
+    total_tiles, scorable_count, annotated_image, scorable_boundaries = detect_scorable_tiles(image_path)
+    print(f"detect_scorable_tiles returned: total={total_tiles}, scorable={scorable_count}")
+    
     template_paths = {
         "beacon_hq": "images/templates/bp_hq_score_3.png",
         "lighthouse": "images/templates/lighthouse_score_3.png", 
