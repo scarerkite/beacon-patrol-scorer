@@ -1,7 +1,8 @@
 import pytest
 import cv2
 import numpy as np
-from scored_objects_detector import detect_scored_object_in_tile, visualize_scored_objects_detection
+from scored_objects_detector import detect_scored_object_in_tile, calculate_board_score, get_rank_for_score, visualize_scored_objects_detection
+
 
 def test_detect_scored_object_returns_correct_format():
     """Test that detect_scored_object_in_tile returns the expected format"""
@@ -105,3 +106,109 @@ def test_board_16_detects_correct_objects():
     assert buoy_count == 3, f"Expected 3 buoys, detected {buoy_count}"  # Changed from 4 to 3
     assert lighthouse_count == 3, f"Expected 3 lighthouses, detected {lighthouse_count}"
     assert empty_count == 1, f"Expected 1 empty, detected {empty_count}"
+
+def test_get_rank_for_score_novices():
+    """Test rank calculation for Novices range"""
+    rank, description = get_rank_for_score(15)
+    assert rank == "Novices"
+    assert "Keep trying!" in description
+
+def test_get_rank_for_score_sailors():
+    """Test rank calculation for Sailors range"""
+    rank, description = get_rank_for_score(30)
+    assert rank == "Sailors"
+    assert "learn the ropes!" in description
+
+def test_get_rank_for_score_captains():
+    """Test rank calculation for Captains range"""
+    rank, description = get_rank_for_score(40)
+    assert rank == "Captains"
+    assert "wind is at your back" in description
+
+def test_get_rank_for_score_navigators():
+    """Test rank calculation for Navigators range"""
+    rank, description = get_rank_for_score(50)
+    assert rank == "Navigators"
+    assert "second nature to you" in description
+
+def test_get_rank_for_score_cartographers():
+    """Test rank calculation for Cartographers range"""
+    rank, description = get_rank_for_score(60)
+    assert rank == "Cartographers"
+    assert "stories of your prowess" in description
+
+def test_get_rank_for_score_boundary_values():
+    """Test boundary values for rank calculation"""
+    # Test exact boundaries
+    assert get_rank_for_score(25)[0] == "Novices"
+    assert get_rank_for_score(26)[0] == "Sailors"
+    assert get_rank_for_score(35)[0] == "Sailors"
+    assert get_rank_for_score(36)[0] == "Captains"
+    assert get_rank_for_score(45)[0] == "Captains"
+    assert get_rank_for_score(46)[0] == "Navigators"
+    assert get_rank_for_score(55)[0] == "Navigators"
+    assert get_rank_for_score(56)[0] == "Cartographers"
+
+def test_calculate_board_score_returns_correct_format():
+    """Test that calculate_board_score returns expected format"""
+    # Use a known test image
+    result = calculate_board_score("test_images/valid_boards/board_7.jpg")
+    
+    # Should return a dictionary
+    assert isinstance(result, dict)
+    
+    # Check required keys exist
+    assert "score" in result
+    assert "rank" in result
+    assert "breakdown" in result
+    
+    # Check types
+    assert isinstance(result["score"], int)
+    assert isinstance(result["rank"], tuple)
+    assert len(result["rank"]) == 2  # (rank_name, description)
+    assert isinstance(result["rank"][0], str)  # rank name
+    assert isinstance(result["rank"][1], str)  # description
+    assert isinstance(result["breakdown"], dict)
+    
+    # Check breakdown structure
+    breakdown = result["breakdown"]
+    assert "buoys" in breakdown
+    assert "lighthouses" in breakdown
+    assert "empty" in breakdown
+
+def test_calculate_board_score_board_7():
+    """Test that board_7.jpg scores 7 points total"""
+    result = calculate_board_score("test_images/valid_boards/board_7.jpg")
+    
+    assert result["score"] == 7
+    assert result["rank"][0] == "Novices"  # 7 points should be Novices rank
+    
+    # Test breakdown totals correctly
+    breakdown = result["breakdown"]
+    calculated_score = (breakdown["buoys"] * 2 + 
+                       breakdown["lighthouses"] * 3 + 
+                       breakdown["empty"] * 1)
+    assert calculated_score == result["score"]
+
+def test_calculate_board_score_board_16():
+    """Test that board_16.jpg scores expected points"""
+    result = calculate_board_score("test_images/valid_boards/board_16.jpg")
+    
+    # Based on your earlier tests: 3 buoys (6 pts) + 3 lighthouses (9 pts) + 1 empty (1 pt) = 16 pts
+    assert result["score"] == 16
+    assert result["rank"][0] == "Novices"  # 16 points should be Novices rank
+    
+    # Verify the breakdown matches expected counts
+    breakdown = result["breakdown"]
+    assert breakdown["buoys"] == 3
+    assert breakdown["lighthouses"] == 3
+    assert breakdown["empty"] == 1
+
+def test_calculate_board_score_handles_missing_file():
+    """Test that function handles non-existent files gracefully"""
+    result = calculate_board_score("definitely_does_not_exist.jpg")
+    
+    # Should return something sensible, not crash
+    # Adjust this based on how you want to handle errors
+    assert result is not None
+    assert isinstance(result, dict)

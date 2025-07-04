@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from tile_analyzer import detect_scorable_tiles
 
 def detect_scored_object_in_tile(tile_image, template_paths, threshold=0.4):
     """
@@ -117,7 +118,7 @@ def has_red_color(image_roi):
     
     return red_percentage > 0.02  # Lower threshold - 2% instead of 5%
 
-def visualize_scored_objects_detection(image_path, tile_boundaries):
+def visualize_scored_objects_detection(image_path, scorable_tile_boundaries):
     """
     Visual test function - shows scored object detection results on image
     """
@@ -179,16 +180,97 @@ def visualize_scored_objects_detection(image_path, tile_boundaries):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+def calculate_board_score(image_path):
+    template_paths = {
+        "beacon_hq": "images/templates/bp_hq_score_3.png",
+        "lighthouse": "images/templates/lighthouse_score_3.png", 
+        "buoy_birds": "images/templates/small_buoy_birds_score_1.png",
+        "buoy_birds2": "images/templates/small_buoy_birds2_score_1.png",
+        "buoy_blue": "images/templates/small_buoy_blue_score_1.png",
+        "buoy_score": "images/templates/small_buoy_score_1.png"
+    }
+
+    empty_tile_score_count = 0
+    buoy_count = 0
+    lighthouse_count = 0
+
+    total_tiles, scorable_count, annotated_image, scorable_tile_boundaries = detect_scorable_tiles(image_path)
+
+    if total_tiles == 0:
+        return {
+            'score': 0,
+            'rank': get_rank_for_score(0),
+            'breakdown': {'buoys': 0, 'lighthouses': 0, 'empty': 0}
+        }
+    
+    image = cv2.imread(image_path)
+    if image is None:
+        print(f"Could not load image: {image_path}")
+        return
+
+    for _i, (left, top, right, bottom) in enumerate(scorable_tile_boundaries):
+        # Extract tile region
+        tile = image[int(top):int(bottom), int(left):int(right)]
+        
+        # Detect scored object
+        object_type, confidence = detect_scored_object_in_tile(tile, template_paths)
+
+        if object_type:         
+            if "buoy" in object_type:
+                buoy_count += 1
+            elif object_type == "lighthouse":
+                lighthouse_count +=1
+            elif object_type == "beacon_hq":
+                lighthouse_count +=1
+        else:
+            empty_tile_score_count += 1
+
+    
+    final_score = empty_tile_score_count + (buoy_count * 2) + (lighthouse_count * 3)
+    rank = get_rank_for_score(final_score)
+
+    return {
+        'score': final_score,
+        'rank': rank,
+        'breakdown': {
+            'buoys': buoy_count,
+            'lighthouses': lighthouse_count, 
+            'empty': empty_tile_score_count
+        }
+}
+
+def get_rank_for_score(score):
+    """
+    Convert a Beacon Patrol score to rank and description.
+    
+    Args:
+        score (int): The total points scored
+        
+    Returns:
+        tuple: (rank_name, description)
+    """
+    if score <= 25:
+        return "Novices", "It's easy to get lost at sea. Keep trying!"
+    elif score <= 35:
+        return "Sailors", "Looks like you're starting to learn the ropes!"
+    elif score <= 45:
+        return "Captains", "A solid effort! The wind is at your back."
+    elif score <= 55:
+        return "Navigators", "Great job! The mysteries of these waters are second nature to you."
+    else:
+        return "Cartographers", "Incredible work! The good folks of the North Sea Coast will tell stories of your prowess for years to come."
+    
+    
+
 if __name__ == "__main__":
     # Quick test
-    from tile_analyzer import detect_scorable_tiles
     
     image_path = "test_images/valid_boards/board_18.jpg"
-    total_tiles, scorable_count, annotated_image, tile_boundaries = detect_scorable_tiles(image_path)
+    total_tiles, scorable_count, annotated_image, scorable_tile_boundaries = detect_scorable_tiles(image_path)
     
     if total_tiles > 0:
         print(f"Testing scored object detection on {total_tiles} tiles...")
-        # You'll need to get tile_boundaries from your tile_analyzer
-        visualize_scored_objects_detection(image_path, tile_boundaries)
+        # You'll need to get scorable_tile_boundaries from your tile_analyzer
+        visualize_scored_objects_detection(image_path, scorable_tile_boundaries)
     else:
         print("No tiles detected to test with")
