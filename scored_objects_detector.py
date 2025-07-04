@@ -118,126 +118,84 @@ def has_red_color(image_roi):
     
     return red_percentage > 0.02  # Lower threshold - 2% instead of 5%
 
-def visualize_scored_objects_detection(image_path, scorable_tile_boundaries):
-    """
-    Visual test function - shows scored object detection results on image
-    """
-    template_paths = {
-        "beacon_hq": "images/templates/bp_hq_score_3.png",
-        "lighthouse": "images/templates/lighthouse_score_3.png", 
-        "buoy_birds": "images/templates/small_buoy_birds_score_1.png",
-        "buoy_birds2": "images/templates/small_buoy_birds2_score_1.png",
-        "buoy_blue": "images/templates/small_buoy_blue_score_1.png",
-        "buoy_score": "images/templates/small_buoy_score_1.png"
-    }
+def generate_annotated_image(image_path, save_path):
+    analysis = _analyze_tiles(image_path)
     
-    total_tiles, scorable_count, annotated_image, scorable_boundaries = detect_scorable_tiles(image_path)
+    # Handle error cases
+    if analysis['total_tiles'] == 0 or analysis['image'] is None:
+        return False
     
-    if total_tiles == 0:
-        print("No tiles detected")
-        return
+    image = analysis['image'].copy()  # Work on a copy
     
-    image = cv2.imread(image_path)
-    if image is None:
-        print(f"Could not load image: {image_path}")
-        return
+    print(f"Checking {len(analysis['tiles'])} scorable tiles for objects...")
     
-    print(f"Checking {len(scorable_boundaries)} scorable tiles for objects...")
-    
-    for _i, (left, top, right, bottom) in enumerate(scorable_boundaries):
-        # Extract tile region
-        tile = image[int(top):int(bottom), int(left):int(right)]
+    for tile_data in analysis['tiles']:
+        left, top, right, bottom = tile_data['boundary']
+        object_type = tile_data['object_type']
         
-        # Detect scored object
-        object_type, confidence = detect_scored_object_in_tile(tile, template_paths)
-        
-        # Draw tile boundary - different colors for different results
-        # In visualize_scored_objects_detection, update the labeling section:
-
+        # Determine color and label (your existing logic)
         if object_type:
-            color = (0, 0, 139)  # Red for detected objects
+            color = (0, 0, 190)  # Red for detected objects
             
-            # Create clear, short labels
             if "buoy" in object_type:
-                label = "B2"  # Buoy = 2 points
+                label = "2"
             elif object_type == "lighthouse":
-                label = "L3"  # Lighthouse = 3 points  
+                label = "3"
             elif object_type == "beacon_hq":
-                label = "HQ3" # Beacon HQ = 3 points
+                label = "3"
             else:
                 label = "?"
         else:
-            color = (139, 69, 19)  # Blue for scorable but empty
-            label = "E1"  # Empty = 1 point
-
+            color = (128, 0, 128)  # Purple for empty
+            label = "1"
+        
+        # Draw rectangle and label
         cv2.rectangle(image, (int(left), int(top)), (int(right), int(bottom)), color, 3)
-
-        # Bigger, more readable text
-        cv2.putText(image, label, (int(left + 10), int(top + 30)),  # Moved inside the box
-                cv2.FONT_HERSHEY_SIMPLEX, 1.2, color, 3)  # Larger font size and thickness
+        cv2.putText(image, label, (int(left + 20), int(top + 45)), 
+                   cv2.FONT_HERSHEY_SIMPLEX, 1.2, color, 5)
     
-    cv2.imshow("Scorable Tiles - Object Detection", image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    success = cv2.imwrite(save_path, image)
+    return success
 
 def calculate_board_score(image_path):
-    template_paths = {
-        "beacon_hq": "images/templates/bp_hq_score_3.png",
-        "lighthouse": "images/templates/lighthouse_score_3.png", 
-        "buoy_birds": "images/templates/small_buoy_birds_score_1.png",
-        "buoy_birds2": "images/templates/small_buoy_birds2_score_1.png",
-        "buoy_blue": "images/templates/small_buoy_blue_score_1.png",
-        "buoy_score": "images/templates/small_buoy_score_1.png"
-    }
-
-    empty_tile_score_count = 0
-    buoy_count = 0
-    lighthouse_count = 0
-
-    total_tiles, scorable_count, annotated_image, scorable_tile_boundaries = detect_scorable_tiles(image_path)
-
-    if total_tiles == 0:
+    analysis = _analyze_tiles(image_path)
+    
+    # Handle error case
+    if analysis['total_tiles'] == 0:
         return {
             'score': 0,
             'rank': get_rank_for_score(0),
             'breakdown': {'buoys': 0, 'lighthouses': 0, 'empty': 0}
         }
     
-    image = cv2.imread(image_path)
-    if image is None:
-        print(f"Could not load image: {image_path}")
-        return
-
-    for _i, (left, top, right, bottom) in enumerate(scorable_tile_boundaries):
-        # Extract tile region
-        tile = image[int(top):int(bottom), int(left):int(right)]
-        
-        # Detect scored object
-        object_type, confidence = detect_scored_object_in_tile(tile, template_paths)
-
-        if object_type:         
-            if "buoy" in object_type:
-                buoy_count += 1
-            elif object_type == "lighthouse":
-                lighthouse_count +=1
-            elif object_type == "beacon_hq":
-                lighthouse_count +=1
-        else:
-            empty_tile_score_count += 1
-
+    # Count object types from analysis data
+    buoy_count = 0
+    lighthouse_count = 0
+    empty_count = 0
     
-    final_score = empty_tile_score_count + (buoy_count * 2) + (lighthouse_count * 3)
+    for tile_data in analysis['tiles']:
+        object_type = tile_data['object_type']
+        
+        if object_type and "buoy" in object_type:
+            buoy_count += 1
+        elif object_type in ["lighthouse", "beacon_hq"]:
+            lighthouse_count += 1
+        else:
+            empty_count += 1
+    
+    # Calculate score and return
+    final_score = empty_count + (buoy_count * 2) + (lighthouse_count * 3)
     rank = get_rank_for_score(final_score)
-
+    
     return {
         'score': final_score,
         'rank': rank,
         'breakdown': {
             'buoys': buoy_count,
             'lighthouses': lighthouse_count, 
-            'empty': empty_tile_score_count
+            'empty': empty_count
         }
-}
+    }
 
 def get_rank_for_score(score):
     """
@@ -260,7 +218,58 @@ def get_rank_for_score(score):
     else:
         return "Cartographers", "Incredible work! The good folks of the North Sea Coast will tell stories of your prowess for years to come."
     
+def _analyze_tiles(image_path):
+    template_paths = {
+        "beacon_hq": "images/templates/bp_hq_score_3.png",
+        "lighthouse": "images/templates/lighthouse_score_3.png", 
+        "buoy_birds": "images/templates/small_buoy_birds_score_1.png",
+        "buoy_birds2": "images/templates/small_buoy_birds2_score_1.png",
+        "buoy_blue": "images/templates/small_buoy_blue_score_1.png",
+        "buoy_score": "images/templates/small_buoy_score_1.png"
+    }
+
+    total_tiles, scorable_count, annotated_image, scorable_boundaries = detect_scorable_tiles(image_path)
+
+    if total_tiles == 0:
+        return {
+            'tiles': [],
+            'total_tiles': 0,
+            'scorable_count': 0,
+            'image': None
+        }
     
+    # Load the image
+    image = cv2.imread(image_path)
+    if image is None:
+        return {
+            'tiles': [],
+            'total_tiles': 0,
+            'scorable_count': 0,
+            'image': None
+        }
+        
+    # The main analysis loop (from your existing functions)
+    tiles_data = []
+    for _i, (left, top, right, bottom) in enumerate(scorable_boundaries):
+        # Extract tile region
+        tile = image[int(top):int(bottom), int(left):int(right)]
+        
+        # Detect scored object
+        object_type, confidence = detect_scored_object_in_tile(tile, template_paths)
+        
+        # Store the results
+        tiles_data.append({
+            'boundary': (left, top, right, bottom),
+            'object_type': object_type,
+            'confidence': confidence
+        })
+    
+    return {
+        'tiles': tiles_data,
+        'total_tiles': total_tiles,
+        'scorable_count': scorable_count,
+        'image': image
+    }
 
 if __name__ == "__main__":
     # Quick test

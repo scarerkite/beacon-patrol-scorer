@@ -1,7 +1,7 @@
 import pytest
 import cv2
 import numpy as np
-from scored_objects_detector import detect_scored_object_in_tile, calculate_board_score, get_rank_for_score, visualize_scored_objects_detection
+from scored_objects_detector import detect_scored_object_in_tile, calculate_board_score, get_rank_for_score, generate_annotated_image
 
 
 def test_detect_scored_object_returns_correct_format():
@@ -212,3 +212,122 @@ def test_calculate_board_score_handles_missing_file():
     # Adjust this based on how you want to handle errors
     assert result is not None
     assert isinstance(result, dict)
+
+import pytest
+import tempfile
+import os
+from scored_objects_detector import generate_annotated_image
+
+def test_generate_annotated_image_creates_file():
+    """Test that annotated image file is actually created"""
+    with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
+        save_path = tmp.name
+    
+    try:
+        success = generate_annotated_image("test_images/valid_boards/board_7.jpg", save_path)
+        
+        assert success == True
+        assert os.path.exists(save_path)
+        assert os.path.getsize(save_path) > 0  # File has content
+        
+        # Optional: Check it's a valid image file
+        import cv2
+        test_image = cv2.imread(save_path)
+        assert test_image is not None
+        
+    finally:
+        if os.path.exists(save_path):
+            os.unlink(save_path)
+
+def test_generate_annotated_image_board_7():
+    """Test annotation generation with board_7 (known to have 4 scorable tiles)"""
+    with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
+        save_path = tmp.name
+    
+    try:
+        success = generate_annotated_image("test_images/valid_boards/board_7.jpg", save_path)
+        
+        assert success == True
+        assert os.path.exists(save_path)
+        
+        # Verify the image is larger than the original (has annotations)
+        original_size = os.path.getsize("test_images/valid_boards/board_7.jpg")
+        annotated_size = os.path.getsize(save_path)
+        
+        # Annotated image might be slightly different size due to compression
+        # but should be reasonable
+        assert annotated_size > 1000  # At least 1KB
+        
+    finally:
+        if os.path.exists(save_path):
+            os.unlink(save_path)
+
+def test_generate_annotated_image_board_16():
+    """Test annotation generation with board_16 (known to have multiple object types)"""
+    with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
+        save_path = tmp.name
+    
+    try:
+        success = generate_annotated_image("test_images/valid_boards/board_16.jpg", save_path)
+        
+        assert success == True
+        assert os.path.exists(save_path)
+        assert os.path.getsize(save_path) > 0
+        
+    finally:
+        if os.path.exists(save_path):
+            os.unlink(save_path)
+
+def test_generate_annotated_image_handles_missing_input_file():
+    """Test error handling for non-existent input file"""
+    with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
+        save_path = tmp.name
+    
+    try:
+        success = generate_annotated_image("definitely_does_not_exist.jpg", save_path)
+        
+        assert success == False
+        # Should not create output file if input doesn't exist
+        # (depending on your implementation, this might vary)
+        
+    finally:
+        if os.path.exists(save_path):
+            os.unlink(save_path)
+
+def test_generate_annotated_image_handles_invalid_save_path():
+    """Test error handling for invalid save location"""
+    # Try to save to a directory that doesn't exist
+    invalid_path = "/nonexistent/directory/output.jpg"
+    
+    success = generate_annotated_image("test_images/valid_boards/board_7.jpg", invalid_path)
+    
+    assert success == False
+
+def test_generate_annotated_image_return_format():
+    """Test that function returns boolean as expected"""
+    with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
+        save_path = tmp.name
+    
+    try:
+        result = generate_annotated_image("test_images/valid_boards/board_7.jpg", save_path)
+        
+        # Should return a boolean
+        assert isinstance(result, bool)
+        assert result == True
+        
+    finally:
+        if os.path.exists(save_path):
+            os.unlink(save_path)
+
+# Optional: Visual inspection test (creates file you can manually check)
+# Uncomment when you want to visually verify the annotations
+# def test_generate_annotated_image_visual_check():
+#     """Generate annotated image for manual visual inspection"""
+#     save_path = "debug_annotated_board_7.jpg"
+    
+#     success = generate_annotated_image("test_images/valid_boards/board_7.jpg", save_path)
+    
+#     assert success == True
+#     assert os.path.exists(save_path)
+    
+#     print(f"Annotated image saved to {save_path} for visual inspection")
