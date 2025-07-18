@@ -1,0 +1,489 @@
+@import url('https://fonts.googleapis.com/css2?family=Delius:wght@400&display=swap');
+
+/* 1. Use a more-intuitive box-sizing model */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* 2. Remove default margin */
+* {
+    margin: 0;
+}
+
+/* 3. Enable keyword animations */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        interpolate-size: allow-keywords;
+    }
+}
+
+body {
+    /* 4. Add accessible line-height */
+    line-height: 1.5;
+    /* 5. Improve text rendering */
+    -webkit-font-smoothing: antialiased;
+}
+
+/* 6. Improve media defaults */
+img,
+picture,
+video,
+canvas,
+svg {
+    display: block;
+    max-width: 100%;
+}
+
+/* 7. Inherit fonts for form controls */
+input,
+button,
+textarea,
+select {
+    font: inherit;
+}
+
+/* 8. Avoid text overflows */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    overflow-wrap: break-word;
+}
+
+/* 9. Improve line wrapping */
+p {
+    text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    text-wrap: balance;
+}
+
+/*
+  10. Create a root stacking context
+*/
+#root,
+#__next {
+    isolation: isolate;
+}
+
+:root {
+    --ocean-blue: #6BA6CD;
+    --ocean-light: #87CEEB;
+    --ocean-dark: #4A90B8;
+    --lighthouse-red: #D2564C;
+    --land-tan: #E6D5B8;
+    --success: #5A9B8A;
+
+    --white: #FFFFFF;
+    --gray-50: #FAFAFA;
+    --gray-100: #F5F5F5;
+    --gray-200: #EEEEEE;
+    --gray-300: #E0E0E0;
+    --gray-600: #757575;
+    --gray-800: #424242;
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 1rem 1rem 1.5rem;
+        /* even more compact on mobile */
+    }
+
+    .form-card {
+        padding: 1.5rem;
+        /* less padding on mobile */
+        border-radius: 12px;
+        /* slightly smaller radius */
+    }
+
+    .upload-form button {
+        padding: 1.25rem 2rem;
+        /* slightly bigger touch target */
+    }
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif; /* readable default */
+    background: var(--white);
+    color: var(--gray-800);
+}
+
+h1, h2, h3 {
+    font-family: 'Delius', 'Trebuchet MS', Verdana, sans-serif;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 1rem;
+}
+
+p {
+    font-size: 1.125rem;
+    color: var(--gray-600);
+    margin-bottom: 1rem;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
+.hero-section {
+    background: linear-gradient(180deg, var(--ocean-light) 0%, var(--ocean-blue) 100%);
+    padding: 2rem 1rem 3rem;
+    text-align: center;
+}
+
+.hero-section h1 {
+    color: var(--white);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 600px;
+    margin: 0 auto 3rem;
+}
+
+.main-content {
+    padding: 2rem 1rem;
+    margin-top: -4rem;
+    /* pulls the card up slightly into the hero */
+}
+
+.form-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.upload-form label {
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.upload-form input[type="file"] {
+    padding: 0.75rem;
+    border: 2px solid var(--gray-300);
+    border-radius: 8px;
+    background: var(--gray-50);
+}
+
+.upload-form button {
+    background: var(--ocean-blue);
+    color: var(--white);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.upload-form button:hover {
+    background: var(--ocean-dark);
+}
+
+.error-message {
+    background: var(--lighthouse-red);
+    color: var(--white);
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.error-image {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.error-image h3 {
+    color: var(--gray-800);
+    margin-bottom: 1rem;
+}
+
+.error-image img {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.results-header h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 0.5rem;
+}
+
+.results-grid {
+    display: grid;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.result-card {
+    background: var(--white);
+    padding: 2.5rem;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 2px solid var(--gray-100);
+}
+
+.score-card {
+    border-color: var(--success);
+}
+
+.score-number {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--success);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.rank-card {
+    border-color: var(--lighthouse-red);
+}
+
+.rank-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--lighthouse-red);
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive grid */
+@media (min-width: 768px) {
+    .results-grid {
+        grid-template-columns: 1fr 1fr; /* two columns on desktop */
+    }
+}
+
+.score-label {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
+.rank-description {
+    font-size: 1rem;
+    color: var(--gray-600);
+}
+
+.board-section {
+    background: var(--gray-50);
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+}
+
+.board-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.board-image {
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    background: var(--ocean-blue);
+    color: var(--white);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: var(--ocean-dark);
+    text-decoration: none;
+    color: var(--white);
+}
+
+/* Smooth transitions for interactive elements */
+.upload-form button,
+.action-btn,
+.result-card {
+    transition: all 0.2s ease;
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.upload-form input[type="file"]:focus {
+    outline: 2px solid var(--ocean-blue);
+    outline-offset: 2px;
+}
+
+/* Loading state for submit button */
+.upload-form button:active {
+    transform: scale(0.98);
+}
+
+/* Focus styles */
+.action-btn:focus,
+.upload-form button:focus {
+    outline: 2px solid var(--ocean-blue);
+    outline-offset: 2px;
+}
+
+/* Better contrast for file help text */
+#file-help {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+.file-upload-area {
+    border: 2px dashed var(--gray-300);
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: var(--gray-50);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.file-upload-area:hover {
+    border-color: var(--ocean-blue);
+    background: var(--white);
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.upload-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.upload-hint {
+    font-size: 0.9rem;
+    color: var(--gray-500);
+}
+
+/* When file is selected */
+.file-upload-area.has-file {
+    border-color: var(--success);
+    background: rgba(90, 155, 138, 0.05);
+}
+
+/* Image Modal */
+.image-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.image-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.modal-image {
+    max-width: 95%;
+    max-height: 95%;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.image-zoom-hint {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.image-zoom-hint::after {
+    content: "🔍 Click to enlarge";
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.image-zoom-hint:hover::after {
+    opacity: 1;
+}
+
+/* Mobile zoom is automatic with pinch-to-zoom */
+@media (max-width: 768px) {
+    .image-zoom-hint::after {
+        content: "📱 Pinch to zoom";
+    }
+}

@@ -4,24 +4,90 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Beacon Patrol Scorer - Results</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Delius:wght@400&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     </head>
 
     <body>
-        <main>
-            <h1>Beacon Patrol Board Scorer</h1>
+        <div class="hero-section">
+            <div class="container">
+                <h1>Voyage Complete!</h1>
+                <p class="subtitle">Your coastal exploration has been analyzed</p>
+            </div>
+        </div>
+        
+        <main class="container main-content">
+            <div class="form-card">
+                <div class="results-header">
+                    <h2>Your Results</h2>
+                </div>
+                
+                <div class="results-grid">
+                    <div class="result-card score-card">
+                        <div class="score-number">{{ score }}</div>
+                        <div class="score-label">Points Earned</div>
+                    </div>
 
-            <div class="results">
-                <h2>Your Results</h2>
-                <p><strong>Score:</strong> {{ score }} points</p>
-                <p><strong>Rank:</strong> {{ rank[0] }}: {{ rank[1] }}</p>
+                    <div class="result-card rank-card">
+                        <div class="rank-title">🧭 {{ rank[0] }}</div>
+                        <div class="rank-description">{{ rank[1] }}</div>
+                    </div>
+                </div>
 
-                <h3>Your Board</h3>
-                <img src="{{ url_for('uploaded_file', filename=filename) }}"
-                    alt="Analyzed Beacon Patrol board with annotations"
-                    style="max-width: 100%; height: auto;">
-
-                <a href="{{ url_for('index') }}">Score Another Board</a>
+                <div class="board-section">
+                    <h3 class="board-title">Your Explored Waters</h3>
+                    <div class="image-zoom-hint" data-image-src="{{ url_for('uploaded_file', filename=filename) }}">
+                        <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Analyzed Beacon Patrol board with annotations"
+                            class="board-image">
+                    </div>
+                </div>
+                
+                <!-- Modal for enlarged image -->
+                <div id="imageModal" class="image-modal" onclick="closeModal()">
+                    <img id="modalImage" class="modal-image" alt="Enlarged board image">
+                </div>
+                    
+                <div style="text-align: center;">
+                    <a href="{{ url_for('index') }}" class="action-btn">
+                        <span>↻</span>
+                        Score Another Board
+                    </a>
+                </div>
             </div>
         </main>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const zoomHints = document.querySelectorAll('.image-zoom-hint');
+
+                zoomHints.forEach(hint => {
+                    hint.addEventListener('click', function () {
+                        const imageSrc = this.getAttribute('data-image-src');
+                        openModal(imageSrc);
+                    });
+                });
+            });
+
+            function openModal(imageSrc) {
+                const modal = document.getElementById('imageModal');
+                const modalImage = document.getElementById('modalImage');
+                modalImage.src = imageSrc;
+                modal.classList.add('active');
+            }
+
+            function closeModal() {
+                const modal = document.getElementById('imageModal');
+                modal.classList.remove('active');
+            }
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        </script>
     </body>
 </html>

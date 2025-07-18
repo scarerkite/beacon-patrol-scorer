@@ -4,31 +4,58 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Beacon Patrol Scorer</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     </head>
 
     <body>
-        <main>
-            <h1>Beacon Patrol Board Scorer</h1>
+        <div class="hero-section">
+            <div class="container">
+                <h1>Beacon Patrol Scorer</h1>
+                <p class="subtitle">Discover your coastal exploration mastery with automated board analysis</p>
+            </div>
+        </div>
+        
+        <main class="container main-content">
             {% if error %}
-                <div style="color: red; margin: 1em 0;">
+                <div class="error-message">
                     <strong>Error:</strong> {{ error }}
                 </div>
                 {% if annotated_filename %}
-                    <div style="margin: 1em 0;">
+                    <div class="error-image">
                         <h3>Your Board (showing issues):</h3>
                         <img src="{{ url_for('uploaded_file', filename=annotated_filename) }}"
-                            alt="Board image showing arrow orientation errors" style="max-width: 100%; height: auto;">
+                            alt="Board image showing arrow orientation errors">
                     </div>
                 {% endif %}
             {% endif %}
-            <p>Upload a photo of your game board to get your score!</p>
-
-            <form action="/upload" method="post" enctype="multipart/form-data">
-                <label for="board-image">Choose board image:</label>
-                <input type="file" id="board-image" name="file" accept="image/*" required aria-describedby="file-help">
-                <div id="file-help">Accepted formats: JPG, PNG, GIF</div>
-                <button type="submit">Upload & Score Board</button>
-            </form>
+            <div class="form-card">            
+                <form action="/upload" method="post" enctype="multipart/form-data" class="upload-form">
+                    <p>Upload a photo of your game board to get your score!</p>
+                
+                    <div class="file-upload-area" id="uploadArea">
+                        <input type="file" id="board-image" name="file" accept="image/*" required class="file-input">
+                        <div class="upload-icon">📸</div>
+                        <div class="upload-text">Click to upload or drag and drop</div>
+                        <div class="upload-hint" id="file-help">JPG, PNG or GIF up to 16MB</div>
+                    </div>
+                
+                    <button type="submit">Analyze Board</button>
+                </form>
+            </div>
         </main>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const fileInput = document.getElementById('board-image');
+                const uploadText = document.querySelector('.upload-text');
+
+                fileInput.addEventListener('change', function (e) {
+                    if (e.target.files.length > 0) {
+                        const file = e.target.files[0];
+                        uploadText.textContent = file.name;
+                    }
+                });
+            });
+        </script>
     </body>
 </html>
