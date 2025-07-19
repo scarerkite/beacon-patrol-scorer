@@ -17,7 +17,7 @@
         
         <main class="container main-content">
             {% if error %}
-                <div class="error-message">
+                <div class="error-message" role="alert" aria-live="assertive">
                     <strong>Error:</strong> {{ error }}
                 </div>
                 {% if annotated_filename %}
@@ -39,7 +39,10 @@
                         <div class="upload-hint" id="file-help">JPG, PNG or GIF up to 16MB</div>
                     </div>
                 
-                    <button type="submit">Analyze Board</button>
+                    <button type="submit" class="submit-btn" id="submitBtn" aria-describedby="loading-status">
+                        <span id="loading-status" aria-live="polite"></span>
+                        Analyze Board
+                    </button>
                 </form>
             </div>
         </main>
