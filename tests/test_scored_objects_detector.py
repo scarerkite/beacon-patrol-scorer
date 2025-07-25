@@ -68,8 +68,6 @@ def test_board_16_detects_correct_objects():
     
     total_tiles, scorable_count, annotated_image, scorable_boundaries = detect_scorable_tiles("test_images/valid_boards/board_16.jpg")
     
-    # Should find 8 scorable tiles total  
-    # Note: Adjust this number based on what's actually detected
     assert scorable_count > 0, f"Should find some scorable tiles, found {scorable_count}"
     
     template_paths = {
@@ -194,13 +192,25 @@ def test_calculate_board_score_board_16():
     """Test that board_16.jpg scores expected points"""
     result = calculate_board_score("test_images/valid_boards/board_16.jpg")
     
-    # Based on your earlier tests: 3 buoys (6 pts) + 3 lighthouses (9 pts) + 1 empty (1 pt) = 16 pts
     assert result["score"] == 16
     assert result["rank"][0] == "Novices"  # 16 points should be Novices rank
     
     # Verify the breakdown matches expected counts
     breakdown = result["breakdown"]
     assert breakdown["buoys"] == 3
+    assert breakdown["lighthouses"] == 3
+    assert breakdown["empty"] == 1
+
+def test_calculate_board_score_board_20():
+    """Test that board_20.jpg scores expected points"""
+    result = calculate_board_score("test_images/valid_boards/board_20.jpg")
+    
+    assert result["score"] == 20
+    assert result["rank"][0] == "Novices"
+    
+    # Verify the breakdown matches expected counts
+    breakdown = result["breakdown"]
+    assert breakdown["buoys"] == 5
     assert breakdown["lighthouses"] == 3
     assert breakdown["empty"] == 1
 
