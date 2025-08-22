@@ -51,18 +51,13 @@ def detect_scored_object_in_tile(tile_image, template_paths, threshold=0.4):
                 max_confidence = 0
                 
         elif template_name in lighthouse_templates:
-            if blue_percentage < 50:
-                # For lighthouse candidates, also check for red color
-                x, y = max_loc
-                roi = color_tile[y:y+template_h, x:x+template_w]
-                
-                if has_red_color(roi):
-                    print(f"    -> RED DETECTED - lighthouse valid")
-                else:
-                    print(f"    -> NO RED - lighthouse rejected")
-                    max_confidence = 0
+            x, y = max_loc
+            roi = color_tile[y:y+template_h, x:x+template_w]
+            
+            if has_red_color(roi):
+                print(f"    -> RED DETECTED - {template_name} valid")
             else:
-                print(f"    -> TOO MUCH WATER - lighthouse rejected")
+                print(f"    -> NO RED - {template_name} rejected")
                 max_confidence = 0
         
         if max_confidence > threshold and max_confidence > best_confidence:

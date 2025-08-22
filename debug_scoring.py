@@ -107,7 +107,8 @@ def main():
         "test_images/valid_boards/board_7.jpg", 
         "test_images/valid_boards/12_tiles.jpg",
         "test_images/valid_boards/14_tiles.jpg",
-        "test_images/valid_boards/board_16.jpg"
+        "test_images/valid_boards/board_16.jpg",
+        "test_images/valid_boards/board_20.jpg",
     ]
     
     print("🔍 BEACON PATROL SCORING DEBUG")
